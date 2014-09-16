@@ -1,0 +1,7 @@
+name = Sabias
+description = Implements a "Did you know content type and a view that displays them."
+package = Drop
+core = 7.x
+php = 5.2
+
+dependencies[] = views

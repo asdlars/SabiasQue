@@ -1,0 +1,112 @@
+<?php 
+
+/**
+ * Implements hook_install().
+ */
+function sabias_install() {
+  module_load_include('inc', 'node', 'content_types');
+  db_update('system')
+    ->condition('name', 'sabias')
+    ->condition('type', 'module')
+    ->fields(array('weight' => -1))
+    ->execute();
+
+  // Optionally create the default webform type.
+      $sabias_type = array(
+      'type' => 'sabias',
+      'name' => st('Did you know'),
+      'base' => 'node_content',
+      'description' => st('Create a "did you know" piece of content.'),
+      'custom' => TRUE,
+      'modified' => TRUE,
+      'locked' => FALSE,
+    );
+    $sabias_type = node_type_set_defaults($sabias_type);
+    node_type_save($sabias_type);
+    node_add_body_field($sabias_type);
+
+    sabias_views_api();
+    sabias_views_default_views();
+
+}
+
+/**
+ * Implements hook_uninstall().
+ */
+function sabias_uninstall() {
+  // Unset sabias variables.
+  //variable_del('sabias_node_types');
+  //variable_del('sabias_node_types_primary');
+
+  node_type_delete('sabias');
+}
+
+function sabias_views_api() {
+  return array(
+    'api' => 3
+  );
+}
+
+function sabias_views_default_views() {
+  // Begin copy and paste of output from the Export tab of a view.
+  $view = new view();
+  $view->name = 'sabias';
+  $view->description = '';
+  $view->tag = 'default';
+  $view->base_table = 'node';
+  $view->human_name = 'Did you know';
+  $view->core = 7;
+  $view->api_version = '3.0';
+  $view->disabled = FALSE; /* Edit this to true to make a default view disabled initially */
+
+  /* Display: Master */
+  $handler = $view->new_display('default', 'Master', 'default');
+  $handler->display->display_options['title'] = 'Did you know...';
+  $handler->display->display_options['use_ajax'] = TRUE;
+  $handler->display->display_options['use_more_always'] = FALSE;
+  $handler->display->display_options['access']['type'] = 'perm';
+  $handler->display->display_options['cache']['type'] = 'none';
+  $handler->display->display_options['query']['type'] = 'views_query';
+  $handler->display->display_options['exposed_form']['type'] = 'basic';
+  $handler->display->display_options['pager']['type'] = 'mini';
+  $handler->display->display_options['pager']['options']['items_per_page'] = '1';
+  $handler->display->display_options['pager']['options']['offset'] = '0';
+  $handler->display->display_options['pager']['options']['id'] = '0';
+  $handler->display->display_options['pager']['options']['quantity'] = '9';
+  $handler->display->display_options['style_plugin'] = 'default';
+  $handler->display->display_options['row_plugin'] = 'node';
+  $handler->display->display_options['row_options']['view_mode'] = 'full';
+  $handler->display->display_options['row_options']['links'] = FALSE;
+  /* Field: Content: Title */
+  $handler->display->display_options['fields']['title']['id'] = 'title';
+  $handler->display->display_options['fields']['title']['table'] = 'node';
+  $handler->display->display_options['fields']['title']['field'] = 'title';
+  $handler->display->display_options['fields']['title']['label'] = '';
+  $handler->display->display_options['fields']['title']['alter']['word_boundary'] = FALSE;
+  $handler->display->display_options['fields']['title']['alter']['ellipsis'] = FALSE;
+  /* Filter criterion: Content: Published */
+  $handler->display->display_options['filters']['status']['id'] = 'status';
+  $handler->display->display_options['filters']['status']['table'] = 'node';
+  $handler->display->display_options['filters']['status']['field'] = 'status';
+  $handler->display->display_options['filters']['status']['value'] = 1;
+  $handler->display->display_options['filters']['status']['group'] = 1;
+  $handler->display->display_options['filters']['status']['expose']['operator'] = FALSE;
+  /* Filter criterion: Content: Type */
+  $handler->display->display_options['filters']['type']['id'] = 'type';
+  $handler->display->display_options['filters']['type']['table'] = 'node';
+  $handler->display->display_options['filters']['type']['field'] = 'type';
+  $handler->display->display_options['filters']['type']['value'] = array(
+    'sabias' => 'sabias',
+  );
+
+  /* Display: Block */
+  $handler = $view->new_display('block', 'Block', 'block');
+  $handler->display->display_options['defaults']['hide_admin_links'] = FALSE;
+  $handler->display->display_options['block_description'] = 'Did you know';
+
+  // At the end, return array of default views.
+
+  $views[$view->name] = $view;
+
+  return $views;
+}
